@@ -1,0 +1,69 @@
+{{extend 'layout.html'}}
+{{longname = deslugify(uClass.name)}}
+<html>
+<body style="background:#fff7e6;">
+
+<ol class="breadcrumb" style="background-color:white; border-style: none;">
+  <li>{{=A('Department', _href=URL('showDepartment'))}}</li>
+  <li>{{=A('Course', _href=URL('showCourse', args=uClass.id))}}</li>
+  <li class="active">Classes</li>
+</ol>
+<div class="row">
+    <h2 class="col-md-10 pull-left">
+        List of Classes for {{=deslugify(db.department[uClass.department_id].short_name).upper()}} {{=uClass.course_num}} {{=deslugify(uClass.name)}}
+    </h2>
+    <div class="h2 pull-right">
+        {{=A('add a class', _class='btn btn-success',
+             _href=URL('createClass',args=uClass.id))}}
+        {{=A('course notes', _class='btn btn-success',
+             _href=URL('courseNotes', args=uClass.id))}}
+    </div>
+</div>
+<table class="table" style="margin-top: 20px; width: 60%;">
+    <tr>
+    {{if sort == None:}}
+      <th>{{=A('Quarter', _href=URL('showClass',args=[uClass.id,"quarter"]))}}</th>
+      <th>Professor</th>
+    {{else:}}
+      <th>Quarter</th>
+      <th>{{=A('Professor', _href=URL('showClass',args=[uClass.id]))}}</th>
+    {{pass}}  
+      <th>Edit</th>
+    </tr>
+  {{for aClass in info:}}
+  {{if aClass.quarter == "1":}}
+  {{term = "Fall"}}
+  {{elif aClass.quarter == "2":}}
+  {{term = "Winter"}}
+  {{elif aClass.quarter == "3":}}
+  {{term = "Spring"}}
+  {{else:}}
+  {{term = "Summer"}}
+  {{pass}}
+  {{quarter = "%s %d" % (term, aClass.yr)}}
+  {{prof = db.professor(aClass.professor_id)}}
+  {{if prof == None:}}
+  {{prof_name = 'Add Professor'}}
+  {{else:}}
+  {{prof_name = "%s %s" % (prof.first_name, prof.last_name)}}
+  {{pass}}
+  <tr>
+    <td>{{=A(quarter.title(), _href=URL('classPage', args=aClass.id))}}</td>
+    {{if prof != None:}}
+    <td>{{=A(prof_name.title(), _href=URL('professor', 'professorReview', args=aClass.professor_id))}}</td>
+    {{else:}}
+    <td>{{=A(prof_name.title(), _href=URL('classPage', args=aClass.id))}}</td>
+    {{pass}}
+    <td>{{=A('edit', _href=URL('editClass', args=aClass.id))}}</td>
+  </tr>
+  {{pass}}
+  <tr>
+    <td ></td>
+    <td></td>
+    <td style="text-align:right">{{=A('Add a class', _href=URL('createClass',args=uClass.id))}}</td>
+  </tr>
+</table>
+
+<i>See what people are discussing about {{=A(deslugify(uClass.name), _href=URL('viewCourseTopic', args=[uClass.id, 0]))}}</i>
+</body>
+</html>

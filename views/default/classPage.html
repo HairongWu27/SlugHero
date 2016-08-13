@@ -1,0 +1,143 @@
+{{extend 'layout.html'}}
+<html>
+<body style="background:#fff7e6;">
+<ol class="breadcrumb" style="background-color:white; border-style: none;">
+  <li>{{=A('Department', _href=URL('showDepartment'))}}</li>
+  <li>{{=A('Course', _href=URL('showCourse', args=thisClass.course_id))}}</li>
+  <li>{{=A('Classes', _href=URL('showClass', args=courseInfo.id))}}</li>
+  <li class="active">Class</li>
+</ol>
+
+<div style="text-align:center">
+{{if thisClass.quarter == "1":}}
+<h1>{{=deslugify(db.course[thisClass.course_id].name)}}: {{=fall}} {{=thisClass.yr}}</h1>
+{{elif thisClass.quarter == "2":}}
+<h1>{{=deslugify(db.course[thisClass.course_id].name)}}: {{=winter}} {{=thisClass.yr}}</h1>
+{{elif thisClass.quarter == "3":}}
+<h1>{{=deslugify(db.course[thisClass.course_id].name)}}: {{=spring}} {{=thisClass.yr}}</h1>
+{{else:}}
+<h1>{{=deslugify(db.course[thisClass.course_id].name)}}: {{=summer}} {{=thisClass.yr}}</h1>
+{{pass}}
+</div>
+<div class="col-md-2">
+<table cellpadding="10" style="float: left">
+<tr><td width="15%">
+    <form action="{{=URL('professor','professorReview', args=thisClass.professor_id)}}">
+        {{if thisClass.professor_id != None:}}
+        <img width="100px" src="{{=URL('default','download', args=db.professor(thisClass.professor_id).image)}}" alt="Professor's Pic"><br/>
+        <p>{{=syllabus}}</p>
+        <input type="submit" name="view_prof" value="Reviews">
+        {{else:}}
+        {{=A('add Professor', _class='btn btn-primary', _href=URL('classPageAddProfessor', args=thisClass.id))}}
+        {{pass}}
+    </form></td>
+    </tr>
+    <tr><td>{{=A('Forum',_href=URL('viewCourseTopic', args=[courseInfo.id, 0]))}}</td></tr>
+    <tr><td>{{=A('Notes',_href=URL('courseNotes', args=[courseInfo.id]))}}</td></tr>
+    <tr><td>{{=A('Textbooks',_href=URL('forum', 'bookExchange'))}}</td></tr>
+    </table></div>
+{{if user is None:}}
+<div class="col-md-6">
+<table>
+<tr><td style="width: 15%;">&nbsp;</td><td>You must be logged in to post a review</td></tr>
+</table>
+    <br/><br/>
+    {{if thisClassProfessor != None:}}
+    {{for review in classReviews:}}
+    <table cellpadding="10" >
+    <tr><td style="width: 35%;"><b>
+        {{if review.quarter == "1":}}
+        {{=fall}}
+        {{elif review.quarter == "2":}}
+        {{=winter}}
+        {{elif review.quarter == "3":}}
+        {{=spring}}
+        {{else:}}
+        {{=summer}}
+        {{pass}}
+       {{=review.yr}}</b></td>
+        <td style="width: 35%;"><b>Difficulty: {{=review.difficulty}}</b></td><td><b>Enjoyment: {{=review.enjoyment}}</b></td></tr>
+<tr><td colspan="4">{{=review.body}}</td></tr>
+<tr><td>&nbsp;</td><td></td></tr>
+<tr><td>&nbsp;</td></tr>
+</table>
+{{pass}}
+{{pass}}
+</div>
+{{else:}}
+{{if thisClassProfessor != None:}}
+<div class="col-md-6">
+<form action="{{=URL('classPage', args=[thisClass.id])}}" method="POST">
+    <table>
+    <tr><td rowspan="5"><textarea name="body" cols="50" rows="6" placeholder="Enter Your Review Here"></textarea></td><td>&nbsp;</td>
+        <td>Year:<input type="text" name="yr" value="2016"/></td></tr>
+    <tr><td>&nbsp;</td><td>Term:<select name="quarter">
+        <option value="1">Fall</option><option value="2">Winter</option><option value="3">Spring</option><option value="4">Summer</option>
+        </select></td></tr>
+    <tr><td>&nbsp;</td><td>Difficulty: <input type="text" name="difficulty" /></td></tr>
+    <tr><td>&nbsp;</td><td>Enjoyment: <input type="text" name="enjoyment" /></td></tr>
+    <tr><td>&nbsp;</td><td>Grade: <select name="grade">
+    <option>A+</option><option>A</option><option>A-</option><option>B+</option><option>B</option><option>B-</option><option>C+</option><option>C</option><option>C-</option><option>D+</option><option>D</option><option>D-</option><option>F</option><option>P</option><option>NP</option>
+    </select></td></tr>
+    <tr><td><input type="submit" value="Submit" /></td></tr></table>
+    <input type="hidden" name="_formname" value="postReview"/>
+    <br/><br/>
+    {{pass}}
+    {{if thisClassProfessor != None:}}
+    {{for review in classReviews:}}
+    <table cellpadding="10" >
+    <tr><td style="width: 35%;"><b>
+        {{if review.quarter == "1":}}
+        {{=fall}}
+        {{elif review.quarter == "2":}}
+        {{=winter}}
+        {{elif review.quarter == "3":}}
+        {{=spring}}
+        {{else:}}
+        {{=summer}}
+        {{pass}}
+        {{=review.yr}}</b></td>
+        <td style="width: 35%;"><b>Difficulty: {{=review.difficulty}}</b></td><td><b>Enjoyment: {{=review.enjoyment}}</b></td></tr>
+<tr><td colspan="4">{{=review.body}}</td></tr>
+<tr><td>&nbsp;&nbsp;&nbsp;{{=A("-" + deslugify(db.auth_user[review.user_id].first_name), _href=URL('userProfile', 'showProfile', args=db.auth_user[review.user_id].id))}}
+</td></tr>
+<tr><td>&nbsp;</td></tr>
+</table>
+{{pass}}
+{{pass}}
+</div>
+{{pass}}
+<div class="col-md-4" id="chartContainer" style="height: 300px; width: 25%;"></div>
+</form>
+</body>
+</html>
+
+<script src="/SlugHero/static/js/canvasjs.min.js"></script>
+<script type="text/javascript">
+
+window.onload = function () {
+	var chart = new CanvasJS.Chart("chartContainer", {
+		theme: "theme2",//theme1
+		title:{
+			text: "Course Grade Distribution"
+		},
+		animationEnabled: true,   // change to true
+		data: [
+		{
+			// Change type to "bar", "area", "spline", "pie",etc.
+			type: "column",
+			dataPoints: [
+				{ label: "A",  y: {{=gradeA}}  },
+				{ label: "B", y: {{=gradeB}}  },
+				{ label: "C", y: {{=gradeC}}  },
+				{ label: "D",  y: {{=gradeD}}  },
+				{ label: "F",  y: {{=gradeF}}  },
+                { label: "P", y: {{=gradeP}}  },
+                { label: "NP", y: {{=gradeNP}} }
+			]
+		}
+		]
+	});
+	chart.render();
+}
+</script>

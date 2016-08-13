@@ -1,0 +1,31 @@
+{{extend 'layout.html'}}
+<html>
+<body style="background:#fff7e6;">
+
+<ol class="breadcrumb" style="background-color:white; border-style: none;">
+  <li>{{=A('Department', _href=URL('showDepartment'))}}</li>
+  <li class="active">Course</li>
+</ol>
+
+<div class="row">
+    <h2 class="col-md-8 pull-left">List of Courses in Department {{=dept.name}}</h2>
+    <div class="h2 pull-right">
+        {{=A('add course', _class='btn btn-success',
+             _href=URL('courseCreate',args=dept.id))}}
+    </div>
+</div>
+<table class="table" style="margin-top: 20px; width: 60%;">
+  {{for course in courses:}}
+    {{courseName=dept.short_name+course.course_num}}
+  <tr>
+    <td>{{=A(courseName.upper(), _href=URL('showClass', args=course.id))}}</td>
+    <td>{{=A('  edit', _href=URL('courseEdit', args=course.id))}}</td>
+  </tr>
+  {{pass}}
+  <tr>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+</body>
+</html>
